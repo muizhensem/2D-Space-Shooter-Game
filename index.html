@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vibe Space Shooter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at top, #050819 0, #02030a 50%, #000 100%);
+        color: #f5f7ff;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      #app {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        max-width: 960px;
+        max-height: 600px;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow:
+          0 30px 80px rgba(0, 0, 0, 0.85),
+          0 0 0 1px rgba(255, 255, 255, 0.04);
+        background: radial-gradient(circle at top, #070b2a 0, #01010a 55%, #000 100%);
+      }
+
+      canvas {
+        display: block;
+      }
+
+      .hud {
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .hud-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(7, 12, 40, 0.9);
+        border: 1px solid rgba(118, 188, 255, 0.4);
+        box-shadow: 0 0 16px rgba(0, 195, 255, 0.25);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .pill-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 30%, #7df9ff, #00b0ff);
+        box-shadow: 0 0 14px rgba(0, 184, 255, 0.8);
+      }
+
+      .score {
+        min-width: 120px;
+        text-align: right;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .score-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+        display: block;
+      }
+
+      .score-value {
+        font-variant-numeric: tabular-nums;
+        color: #7df9ff;
+        text-shadow: 0 0 12px rgba(0, 225, 255, 0.9);
+      }
+
+      .hud-bottom {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .controls {
+        font-size: 11px;
+        opacity: 0.8;
+        display: grid;
+        gap: 4px;
+      }
+
+      .keycaps {
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+      }
+
+      .keycap {
+        min-width: 18px;
+        padding: 3px 5px;
+        border-radius: 6px;
+        background: rgba(5, 10, 32, 0.9);
+        border: 1px solid rgba(173, 207, 255, 0.6);
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.2),
+          0 0 12px rgba(0, 178, 255, 0.8);
+        text-align: center;
+        font-size: 10px;
+      }
+
+      .badge {
+        font-size: 10px;
+        opacity: 0.7;
+      }
+
+      .game-over {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top, rgba(4, 6, 20, 0.1), rgba(0, 0, 0, 0.9));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.35s ease-out;
+      }
+
+      .game-over.visible {
+        pointer-events: auto;
+        opacity: 1;
+      }
+
+      .game-over-card {
+        padding: 22px 26px;
+        border-radius: 18px;
+        background: radial-gradient(circle at top, #0d112f, #050719 60%, #02030b);
+        border: 1px solid rgba(143, 190, 255, 0.4);
+        box-shadow:
+          0 24px 60px rgba(0, 0, 0, 0.95),
+          0 0 0 1px rgba(255, 255, 255, 0.03);
+        text-align: center;
+        max-width: 260px;
+      }
+
+      .game-over-title {
+        font-size: 20px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+
+      .game-over-score {
+        font-size: 14px;
+        margin-bottom: 14px;
+      }
+
+      .game-over-score span {
+        color: #7df9ff;
+        text-shadow: 0 0 10px rgba(0, 222, 255, 0.9);
+        font-weight: 600;
+      }
+
+      .btn {
+        margin-top: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: none;
+        background: radial-gradient(circle at 30% 0, #7df9ff, #008cff);
+        color: #02040c;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow:
+          0 12px 30px rgba(0, 168, 255, 0.7),
+          0 0 0 1px rgba(0, 0, 0, 0.8);
+        transition: transform 0.12s ease-out, box-shadow 0.12s ease-out,
+          filter 0.12s ease-out;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+        box-shadow:
+          0 18px 40px rgba(0, 168, 255, 0.85),
+          0 0 0 1px rgba(0, 0, 0, 0.9);
+      }
+
+      .btn:active {
+        transform: translateY(1px) scale(0.97);
+        box-shadow:
+          0 8px 18px rgba(0, 168, 255, 0.7),
+          0 0 0 1px rgba(0, 0, 0, 0.9);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="hud">
+        <div class="hud-top">
+          <div class="pill">
+            <div class="pill-dot"></div>
+            <span>Vibe Space Patrol</span>
+          </div>
+          <div class="score">
+            <span class="score-label">Score</span>
+            <span id="scoreValue" class="score-value">00000</span>
+          </div>
+        </div>
+        <div class="hud-bottom">
+          <div class="controls">
+            <div>
+              <span class="keycaps">
+                <span class="keycap">W</span>
+                <span class="keycap">A</span>
+                <span class="keycap">S</span>
+                <span class="keycap">D</span>
+              </span>
+              &nbsp;or&nbsp;
+              <span class="keycaps">
+                <span class="keycap">⬆</span>
+                <span class="keycap">⬅</span>
+                <span class="keycap">⬇</span>
+                <span class="keycap">➡</span>
+              </span>
+              &nbsp;to move
+            </div>
+            <div>
+              <span class="keycaps">
+                <span class="keycap">Space</span>
+              </span>
+              &nbsp;to fire
+            </div>
+          </div>
+          <div class="badge">Survive as long as you can.</div>
+        </div>
+      </div>
+
+      <div class="game-over" id="gameOverOverlay">
+        <div class="game-over-card">
+          <div class="game-over-title">Game Over</div>
+          <div class="game-over-score">
+            Final Score<br />
+            <span id="finalScore">00000</span>
+          </div>
+          <button class="btn" id="restartButton">Restart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Three.js from CDN -->
+    <script src="https://unpkg.com/three@0.165.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.165.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="./main.js"></script>
+  </body>
+  </html>
+
